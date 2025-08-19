@@ -5,6 +5,7 @@ This repository contains a Model Context Protocol (MCP) server that provides a t
 ## Features
 
 -   **Google Search Integration:** Perform Google searches using the CSE API.
+-   **Expanded Search Parameters:** Support for a wide range of search parameters, including `dateRestrict`, `siteSearch`, `fileType`, and more.
 -   **Flexible Configuration:** Configure the server via environment variables or a `.env` file.
 -   **User-Friendly Tools:** Provides a clear `google_search` tool with support for various search parameters.
 -   **Conversational Outputs:** Returns search results in a conversational format, making it easy for clients to use the results.
@@ -80,7 +81,7 @@ npx @modelcontextprotocol/inspector uv run --with requests,python-dotenv,pydanti
 > list_tools
 
 # Call the 'google_search' tool with arguments
-> call_tool google_search '''{"query": "What is the capital of France?"}'''
+> call_tool google_search '''{"query": "AI news", "dateRestrict": "d7"}'''
 ```
 
 This provides a reliable way to test all the tools and verify that the server is working as expected.
@@ -129,13 +130,15 @@ You can connect to this server from any standard MCP client. Here’s how to do 
 
     *Note: Replace `/path/to/your/project` with the actual path to the project directory.*
 
-2.  **Use the Tools:** Once connected, you can use the exposed tools in your chat or agent interactions with natural language queries or structured calls. For example, to perform a Google search, you could send the following structured tool call:
+2.  **Use the Tools:** Once connected, you can use the exposed tools in your chat or agent interactions with natural language queries or structured calls. For example, to perform a Google search for recent PDF documents about machine learning, you could send the following structured tool call:
 
     ```json
     {
       "tool": "google_search",
       "arguments": {
-        "query": "What is the weather in London?"
+        "query": "machine learning",
+        "dateRestrict": "m1",
+        "fileType": "pdf"
       }
     }
     ```

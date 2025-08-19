@@ -17,7 +17,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List, Literal, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -74,19 +74,51 @@ class GoogleApiConfig(BaseModel):
 class GoogleSearchInput(BaseModel):
     """Input model for the google_search tool."""
 
-    query: str
+    query: str = Field(..., description="The search query.")
     num: int = Field(
         default=10, ge=1, le=10, description="Number of results to return (1-10)."
     )
     start: int = Field(
-        default=1, ge=1, description="The starting index of the results."
+        default=1,
+        ge=1,
+        description="The starting index of the results (1-based). For example, `&start=11` would start at the 11th result.",
     )
     dateRestrict: str | None = Field(
         default=None,
-        description="Restricts results to a time period (e.g., 'd7', 'w2').",
+        description="Restricts results to a time period. Format: `d[number]`, `w[number]`, `m[number]`, `y[number]` (days, weeks, months, years). Example: `d7` for the last 7 days.",
     )
     siteSearch: str | None = Field(
-        default=None, description="Restricts results to a specific site."
+        default=None,
+        description="Restricts results to a specific site. Example: `wikipedia.org`.",
+    )
+    siteSearchFilter: Literal["e", "i"] | None = Field(
+        default=None,
+        description="Whether to include (`i`) or exclude (`e`) results from the `siteSearch` domain.",
+    )
+    exactTerms: str | None = Field(
+        default=None,
+        description="A phrase that all search results must contain. Example: `"climate change"`"
+    )
+    excludeTerms: str | None = Field(
+        default=None,
+        description="A word or phrase that should not appear in any search results. Example: `politics`"
+    )
+    fileType: str | None = Field(
+        default=None, description="Restricts results to files of a specific extension. Example: `pdf`"
+    )
+    gl: str | None = Field(
+        default=None,
+        description="Geolocation of the end user. A two-letter country code. Example: `us` for United States.",
+    )
+    lr: str | None = Field(
+        default=None,
+        description="Restricts the search to documents written in a particular language. Example: `lang_en` for English.",
+    )
+    safe: Literal["active", "off"] | None = Field(
+        default="active", description="Search safety level. `active` or `off`."
+    )
+    searchType: Literal["image"] | None = Field(
+        default=None, description="Specifies the search type. Set to `image` for image search."
     )
 
 
@@ -132,6 +164,7 @@ def _parse_api_response(
     ]
     return results, f"Found {len(results)} results."
 
+
 def perform_google_search(
     config: GoogleApiConfig,
     args: GoogleSearchInput,
@@ -170,8 +203,11 @@ async def serve():
             Tool(
                 name="google_search",
                 description=(
-                    "Performs a Google Programmable Search (CSE) query. "
-                    "Returns a list of results with titles, links, and snippets."
+                    "Performs a Google Programmable Search (CSE) query with fine-grained control over search parameters. "
+                    "Returns a list of results with titles, links, and snippets. Examples:\n"
+                    "- Search for recent news about AI: `google_search(query='AI news', dateRestrict='d7')`\n"
+                    "- Find PDF documents about machine learning on .gov sites: `google_search(query='machine learning', siteSearch='gov', fileType='pdf')`\n"
+                    "- Search for images of cats: `google_search(query='cats', searchType='image')`"
                 ),
                 inputSchema=GoogleSearchInput.model_json_schema(),
             )
