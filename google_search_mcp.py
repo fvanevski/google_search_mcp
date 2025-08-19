@@ -204,10 +204,16 @@ async def serve():
                 name="google_search",
                 description=(
                     "Performs a Google Programmable Search (CSE) query with fine-grained control over search parameters. "
-                    "Returns a list of results with titles, links, and snippets. Examples:\n"
-                    "- Search for recent news about AI: `google_search(query='AI news', dateRestrict='d7')`\n"
-                    "- Find PDF documents about machine learning on .gov sites: `google_search(query='machine learning', siteSearch='gov', fileType='pdf')`\n"
-                    "- Search for images of cats: `google_search(query='cats', searchType='image')`"
+                    "Returns a list of results with titles, links, and snippets. Key parameters include:\n"
+                    "- `query`: The search term (e.g., 'latest AI research').\n"
+                    "- `num`: Number of results to return (1-10).\n"
+                    "- `dateRestrict`: Filter results by time. Use `d[number]`, `w[number]`, `m[number]`, or `y[number]` (e.g., `d7` for the last 7 days).\n"
+                    "- `siteSearch`: Restrict results to a specific domain (e.g., `arxiv.org`).\n"
+                    "- `fileType`: Search for specific file types (e.g., `pdf`, `docx`).\n"
+                    "- `searchType`: Set to `image` to search for images.\n"
+                    "Examples:\n"
+                    "- To find recent papers on machine learning from arxiv.org: `google_search(query='machine learning', siteSearch='arxiv.org', dateRestrict='m1')`\n"
+                    "- To search for images of the Golden Gate Bridge: `google_search(query='Golden Gate Bridge', searchType='image')`"
                 ),
                 inputSchema=GoogleSearchInput.model_json_schema(),
             )
@@ -219,9 +225,10 @@ async def serve():
             Prompt(
                 name="Web Search",
                 description=(
-                    "Answers questions and finds information using Google Search. "
-                    "Refine searches with `dateRestrict` (e.g., 'd7' for last 7 days) "
-                    "and `siteSearch` (e.g., 'site:wikipedia.org')."
+                    "Answers questions and finds information using Google Search. This tool is your gateway to the web. "
+                    "Formulate your query to be as specific as possible. For example, instead of 'python,' try 'python list comprehension tutorial'. "
+                    "You can also use parameters to narrow your search. For instance, to find recent articles on a topic, use `dateRestrict`. "
+                    "To search within a specific website, use `siteSearch`. Combining these can be powerful, e.g., searching for recent news from a specific source."
                 ),
                 arguments=[
                     PromptArgument(
