@@ -97,7 +97,7 @@ class GoogleSearchInput(BaseModel):
     )
     exactTerms: str | None = Field(
         default=None,
-        description="A phrase that all search results must contain. Example: `"climate change"`"
+        description='A phrase that all search results must contain. Example: "climate change"',
     )
     excludeTerms: str | None = Field(
         default=None,
