@@ -22,8 +22,10 @@ Before running the server, you need to have Python 3.12+ and `uv` installed. You
    ```bash
    # Use gh cli to clone repository
    gh repo clone fvanevski/google_search_mcp
-   # Use git to clone repository
-   git clone https://github.com/fvanevski/google_search_mcp.git
+
+   # Alternateively, use git to clone repository
+   # git clone https://github.com/fvanevski/google_search_mcp.git
+   
    # Enter the repository directory
    cd google_search_mcp
    ```
