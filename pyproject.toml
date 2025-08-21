@@ -1,0 +1,12 @@
+[project]
+name = "google_search_mcp"
+version = "0.1.0"
+description = "MCP server implementation of Google Custom Search Engine (CSE) API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "python-dotenv",
+    "pydantic",
+    "mcp"
+]

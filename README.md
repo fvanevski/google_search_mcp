@@ -40,7 +40,7 @@ uv venv
 source .venv/bin/activate
 
 # Install the dependencies
-uv pip install mcp requests pydantic python-dotenv
+uv sync
 ```
 
 ## Running and Testing the Server
@@ -93,7 +93,7 @@ The server is configured using environment variables or a `.env` file in your pr
 ### Environment Variables
 
 -   `GOOGLE_API_KEY`: Your Google API key.
--   `GOOGLE_CSE_ID`: Your Programmable Search Engine (CSE) ID.
+-   `GOOGLE_CSE_ID`: Your Custom Search Engine (CSE) ID.
 
 **Example `.env` file:**
 
@@ -117,12 +117,10 @@ You can connect to this server from any standard MCP client. Here’s how to do 
           "command": "uv",
           "args": [
             "run",
-            "--with",
-            "requests,python-dotenv,pydantic,mcp",
-            "--",
             "python",
-            "/path/to/your/project/google_search_mcp.py"
-          ]
+            "google_search_mcp.py"
+          ],
+          "cwd": "/path/to/your/project"
         }
       }
     }
