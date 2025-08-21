@@ -4,12 +4,12 @@ This repository contains a Model Context Protocol (MCP) server that provides a t
 
 ## Features
 
--   **Google Search Integration:** Perform Google searches using the CSE API.
--   **Expanded Search Parameters:** Support for a wide range of search parameters, including `dateRestrict`, `siteSearch`, `fileType`, and more.
--   **Flexible Configuration:** Configure the server via environment variables or a `.env` file.
--   **User-Friendly Tools:** Provides a clear `google_search` tool with support for various search parameters.
--   **Conversational Outputs:** Returns search results in a conversational format, making it easy for clients to use the results.
--   **Standalone and Asynchronous:** The server runs as a standalone script and uses an asynchronous architecture for better performance.
+- **Google Search Integration:** Perform Google searches using the CSE API.
+- **Expanded Search Parameters:** Support for a wide range of search parameters, including `dateRestrict`, `siteSearch`, `fileType`, and more.
+- **Flexible Configuration:** Configure the server via environment variables or a `.env` file.
+- **User-Friendly Tools:** Provides a clear `google_search` tool with support for various search parameters.
+- **Conversational Outputs:** Returns search results in a conversational format, making it easy for clients to use the results.
+- **Standalone and Asynchronous:** The server runs as a standalone script and uses an asynchronous architecture for better performance.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Before running the server, you need to have Python 3.12+ and `uv` installed. You
 
 ## Installation
 
-1.  **Clone the repository.**
+1. **Clone the repository.**
 
 ```bash
 # Use gh cli to clone repository
@@ -30,7 +30,7 @@ git clone https://github.com/fvanevski/google_search_mcp.git
 cd google_search_mcp
 ```
 
-2.  **Create a virtual environment and install the required dependencies:**
+2. **Create a virtual environment and install the required dependencies:**
 
 ```bash
 # Create a virtual environment
@@ -61,7 +61,7 @@ However, the server will simply start and wait for input, so you won't be able t
 
 The recommended way to test the server interactively is with **MCP Inspector**. It runs as a command-line tool and provides an interactive shell for sending requests to your server.
 
-1.  **Launch the Inspector:**
+1. **Launch the Inspector:**
     You can run the inspector without a permanent installation using `npx`. The inspector will launch your MCP server script for you. From your project directory, run:
 
 ```bash
@@ -69,14 +69,14 @@ The recommended way to test the server interactively is with **MCP Inspector**. 
 npx @modelcontextprotocol/inspector uv run --with requests,python-dotenv,pydantic,mcp -- python3 google_search_mcp.py
 ```
 
-    Even if you have your virtual environment active, the `python` command as executed by the inspector will not correctly point to the interpreter with the necessary dependencies, thus we use uv instead with the `--with` flag.
+Even if you have your virtual environment active, the `python` command as executed by the inspector will not correctly point to the interpreter with the necessary dependencies, thus we use uv instead with the `--with` flag.
 
-2.  **Interact with the Server:**
+2. **Interact with the Server:**
     Once the inspector starts, you can click the "Connect" button to establish a session with your server. You can then use commands like `list_tools` and `call_tool` to interact with it.
 
     **Example session:**
 
-```
+```bash
 # List all available tools
 > list_tools
 
@@ -92,12 +92,12 @@ The server is configured using environment variables or a `.env` file in your pr
 
 ### Environment Variables
 
--   `GOOGLE_API_KEY`: Your Google API key.
--   `GOOGLE_CSE_ID`: Your Custom Search Engine (CSE) ID.
+- `GOOGLE_API_KEY`: Your Google API key.
+- `GOOGLE_CSE_ID`: Your Custom Search Engine (CSE) ID.
 
 **Example `.env` file:**
 
-```
+```bash
 GOOGLE_API_KEY=your-secret-api-key
 GOOGLE_CSE_ID=your-cse-id
 ```
@@ -106,7 +106,7 @@ GOOGLE_CSE_ID=your-cse-id
 
 You can connect to this server from any standard MCP client. Here’s how to do it in a VS Code environment that supports MCP:
 
-1.  **Configure Your MCP Client:** In your IDE's MCP client settings (e.g., in `mcp.json` for VS Code), configure a new MCP server that points to the script.
+1. **Configure Your MCP Client:** In your IDE's MCP client settings (e.g., in `mcp.json` for VS Code), configure a new MCP server that points to the script.
 
     **Example `mcp.json` entry for VS Code:**
 
@@ -128,7 +128,7 @@ You can connect to this server from any standard MCP client. Here’s how to do 
 
     *Note: Replace `/path/to/your/project` with the actual path to the project directory.*
 
-2.  **Use the Tools:** Once connected, you can use the exposed tools in your chat or agent interactions with natural language queries or structured calls. For example, to perform a Google search for recent PDF documents about machine learning, you could send the following structured tool call:
+2. **Use the Tools:** Once connected, you can use the exposed tools in your chat or agent interactions with natural language queries or structured calls. For example, to perform a Google search for recent PDF documents about machine learning, you could send the following structured tool call:
 
     ```json
     {
