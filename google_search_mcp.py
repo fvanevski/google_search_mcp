@@ -15,9 +15,10 @@ Run:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
-from typing import Dict, List, Literal, Tuple
+from typing import Any, Dict, List, Literal, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -101,10 +102,11 @@ class GoogleSearchInput(BaseModel):
     )
     excludeTerms: str | None = Field(
         default=None,
-        description="A word or phrase that should not appear in any search results. Example: `politics`"
+        description="A word or phrase that should not appear in any search results. Example: `politics`",
     )
     fileType: str | None = Field(
-        default=None, description="Restricts results to files of a specific extension. Example: `pdf`"
+        default=None,
+        description="Restricts results to files of a specific extension. Example: `pdf`",
     )
     gl: str | None = Field(
         default=None,
@@ -118,7 +120,12 @@ class GoogleSearchInput(BaseModel):
         default="active", description="Search safety level. `active` or `off`."
     )
     searchType: Literal["image"] | None = Field(
-        default=None, description="Specifies the search type. Set to `image` for image search."
+        default=None,
+        description="Specifies the search type. Set to `image` for image search.",
+    )
+    sort: str | None = Field(
+        default=None,
+        description="Sorts results by a specific attribute. Format: `TYPE-NAME:DIRECTION`. Example: `metatags-pubdate:d` to sort by publication date in descending order.",
     )
 
 
@@ -147,28 +154,30 @@ def _make_api_call(
 
 def _parse_api_response(
     response: requests.Response,
-) -> Tuple[List[Dict[str, str]], str]:
-    """Parses the JSON response from the API."""
+) -> Tuple[List[Dict[str, Any]], str]:
+    """Parses the JSON response from the API into the desired format."""
     data = response.json()
     items = data.get("items") or []
     if not items:
         return [], "No results found."
 
-    results = [
-        {
+    results = []
+    for item in items:
+        result_item = {
+            "url": item.get("link", ""),
             "title": item.get("title", ""),
-            "link": item.get("link", ""),
             "snippet": item.get("snippet", ""),
+            "pagemap": item.get("pagemap"),
         }
-        for item in items
-    ]
+        results.append(result_item)
+
     return results, f"Found {len(results)} results."
 
 
 def perform_google_search(
     config: GoogleApiConfig,
     args: GoogleSearchInput,
-) -> Tuple[List[Dict[str, str]], str]:
+) -> Tuple[List[Dict[str, Any]], str]:
     """The actual logic for performing a Google search."""
     logging.info(f"Executing google_search with query: '{args.query}'")
     params = args.model_dump(exclude_none=True)
@@ -178,9 +187,7 @@ def perform_google_search(
         response = _make_api_call(config, params)
         return _parse_api_response(response)
     except Exception as e:
-        logging.error(
-            f"An unexpected error occurred during search: {e}", exc_info=True
-        )
+        logging.error(f"An unexpected error occurred during search: {e}", exc_info=True)
         raise McpError(
             ErrorData(code=INTERNAL_ERROR, message=f"Unexpected error: {e}")
         )
@@ -203,17 +210,8 @@ async def serve():
             Tool(
                 name="google_search",
                 description=(
-                    "Performs a Google Programmable Search (CSE) query with fine-grained control over search parameters. "
-                    "Returns a list of results with titles, links, and snippets. Key parameters include:\n"
-                    "- `query`: The search term (e.g., 'latest AI research').\n"
-                    "- `num`: Number of results to return (1-10).\n"
-                    "- `dateRestrict`: Filter results by time. Use `d[number]`, `w[number]`, `m[number]`, or `y[number]` (e.g., `d7` for the last 7 days).\n"
-                    "- `siteSearch`: Restrict results to a specific domain (e.g., `arxiv.org`).\n"
-                    "- `fileType`: Search for specific file types (e.g., `pdf`, `docx`).\n"
-                    "- `searchType`: Set to `image` to search for images.\n"
-                    "Examples:\n"
-                    "- To find recent papers on machine learning from arxiv.org: `google_search(query='machine learning', siteSearch='arxiv.org', dateRestrict='m1')`\n"
-                    "- To search for images of the Golden Gate Bridge: `google_search(query='Golden Gate Bridge', searchType='image')`"
+                    "Performs a Google Programmable Search (CSE) query. "
+                    "Returns a JSON list of results, each containing a URL, title, snippet, and pagemap."
                 ),
                 inputSchema=GoogleSearchInput.model_json_schema(),
             )
@@ -224,12 +222,7 @@ async def serve():
         return [
             Prompt(
                 name="Web Search",
-                description=(
-                    "Answers questions and finds information using Google Search. This tool is your gateway to the web. "
-                    "Formulate your query to be as specific as possible. For example, instead of 'python,' try 'python list comprehension tutorial'. "
-                    "You can also use parameters to narrow your search. For instance, to find recent articles on a topic, use `dateRestrict`. "
-                    "To search within a specific website, use `siteSearch`. Combining these can be powerful, e.g., searching for recent news from a specific source."
-                ),
+                description="Answers questions and finds information using Google Search.",
                 arguments=[
                     PromptArgument(
                         name="query", description="The search query", required=True
@@ -250,13 +243,9 @@ async def serve():
             raise McpError(ErrorData(code=INVALID_PARAMS, message=str(e)))
 
         results, summary = perform_google_search(config, args)
-        formatted_results = "\n\n".join(
-            f"Title: {r['title']}\nLink: {r['link']}\nSnippet: {r['snippet']}"
-            for r in results
-        )
-        return [
-            TextContent(type="text", text=f"{summary}\n\n{formatted_results}")
-        ]
+
+        # Return results as a JSON string
+        return [TextContent(type="text", text=json.dumps(results, indent=4))]
 
     @server.get_prompt()
     async def get_prompt(
@@ -279,15 +268,14 @@ async def serve():
 
         try:
             results, summary = perform_google_search(config, args)
-            content = "\n\n".join(
-                f"Title: {r['title']}\nLink: {r['link']}\nSnippet: {r['snippet']}"
-                for r in results
-            )
             return GetPromptResult(
                 description=summary,
                 messages=[
                     PromptMessage(
-                        role="user", content=TextContent(type="text", text=content)
+                        role="user",
+                        content=TextContent(
+                            type="text", text=json.dumps(results, indent=4)
+                        ),
                     )
                 ],
             )
